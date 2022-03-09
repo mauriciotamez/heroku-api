@@ -12,9 +12,11 @@ const sequelize = new Sequelize({
   database: process.env.DB, // example
   dialect: 'postgres',
   logging: false,
-  ssl: {
-    require: true,
-    rejectUnauthorized: false
+  dialectOptions: {
+    ssl: {
+      require: true,
+      rejectUnauthorized: false
+    }
   }
 })
 
