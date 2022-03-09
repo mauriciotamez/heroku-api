@@ -5,13 +5,17 @@ dotenv.config({ path: './config.env' })
 
 // Localhost connection
 const sequelize = new Sequelize({
-  host: 'localhost', // localhost
-  username: 'postgres', // postgres
+  host: process.env.DB_HOST, // localhost
+  username: process.env.DB_USER, // postgres
   password: process.env.DB_PASSWORD,
   port: 5432,
-  database: 'sequelize-basics', // example
+  database: process.env.DB, // example
   dialect: 'postgres',
-  logging: false
+  logging: false,
+  ssl: {
+    require: true,
+    rejectUnauthorized: false
+  }
 })
 
 // Connect to Heroku cloud
