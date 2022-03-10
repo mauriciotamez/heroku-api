@@ -1,3 +1,6 @@
+const bcrypt = require('bcryptjs')
+
+// Models
 const { Comment } = require('../models/comment.model')
 const { Post } = require('../models/post.model')
 const { User } = require('../models/user.model')
@@ -56,19 +59,23 @@ exports.createNewUser = handleError(async (req, res, next) => {
     return next(new AppError(404, 'Must provide a name, email and password'))
   }
 
+  const salt = await bcrypt.genSalt(12)
+  const hashedPassword = await bcrypt.hash(password, salt)
+
   // MUST ENCRYPT PASSWORD
   const newUser = await User.create({
     name,
     email,
-    password
+    password: hashedPassword
   })
+
+  newUser.password = undefined
 
   res.status(201).json({
     status: 'success',
     data: { newUser }
   })
 })
-
 // Update user (patch)
 exports.updateUser = (req, res) => {
   const { id } = req.params
@@ -111,3 +118,19 @@ exports.deleteUser = (req, res) => {
 
   res.status(204).json({ status: 'success' })
 }
+
+exports.loginUser = handleError(async (req, res, next) => {
+  const { email, password } = req.body
+
+  const user = await User.findOne({
+    where: { email, status: 'active' }
+  })
+
+  if (!user || !(await bcrypt.compare(password, user.password))) {
+    return next(new AppError(400, 'Credentials invalid'))
+  }
+
+  res.status(200).json({
+    status: 'success'
+  })
+})
